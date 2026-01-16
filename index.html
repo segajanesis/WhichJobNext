@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Compass | Find Your Next Move</title>
+    <title>Which Job Next? | Find Your Next Move</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
@@ -312,8 +312,8 @@
 <body>
     <div class="container">
         <header>
-            <h1 class="logo">Career<span>Compass</span></h1>
-            <p class="tagline">Discover where your experience can take you next</p>
+            <h1 class="logo"><span>Which Job Next?</span></h1>
+            <p class="tagline">Make a logical leap to your next role.</p>
         </header>
 
         <div class="input-section">
@@ -325,7 +325,7 @@
 Include your work history, job titles, company names, and descriptions of what you did in each role. The more detail you include, the better recommendations you'll get."
             ></textarea>
             <button class="btn" id="analyze-btn" onclick="analyzeResume()">
-                <span class="btn-text">Analyze My Career Path</span>
+                <span class="btn-text">Show My Results</span>
             </button>
         </div>
 
@@ -333,7 +333,7 @@ Include your work history, job titles, company names, and descriptions of what y
 
         <div class="results-section" id="results">
             <div class="screenshot-notice">
-                <strong>📸 Want to save this?</strong> Take a screenshot of this page to keep your results. This report isn't stored anywhere.
+                <strong>Screenshot to Save!</strong>This report isn't stored anywhere.
             </div>
 
             <div class="report-card">
@@ -352,7 +352,7 @@ Include your work history, job titles, company names, and descriptions of what y
             </div>
 
             <div class="report-card">
-                <h2>Companies That Could Be a Great Fit</h2>
+                <h2>Apply to These Companies First</h2>
                 <p style="color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem;">These companies have similar cultures, structures, or industries to where you've worked:</p>
                 <div id="company-suggestions">
                     <!-- Populated by JS -->
@@ -361,7 +361,7 @@ Include your work history, job titles, company names, and descriptions of what y
         </div>
 
         <footer>
-            Built to help you find your next opportunity
+            Built with love and frustration at the current job market in 2026
         </footer>
     </div>
 
@@ -380,7 +380,7 @@ Include your work history, job titles, company names, and descriptions of what y
             }
 
             if (resumeText.length < 100) {
-                showError('That seems too short. Please paste your full resume for better results.');
+                showError('That seems short. Please paste your full resume for better results.');
                 return;
             }
 

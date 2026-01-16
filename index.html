@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Compass | Find Your Next Move</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #faf9f7;
+            --accent: #e07a5f;
+            --accent-dark: #c56a52;
+            --muted: #6b7280;
+            --border: #e5e5e5;
+            --success: #059669;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            min-height: 280px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-section textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .input-section textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 1rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.visible {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screenshot-notice {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .screenshot-notice strong {
+            color: #92400e;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+        }
+
+        .report-card h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--ink);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+
+        .extracted-history {
+            margin-bottom: 1.5rem;
+        }
+
+        .job-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .job-item:last-child {
+            border-bottom: none;
+        }
+
+        .job-item h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .job-item .company {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .job-item .summary {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .title-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .title-tag {
+            background: #f3f4f6;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        .company-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .company-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .company-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .company-card h3 a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .company-card h3 a:hover {
+            text-decoration: underline;
+        }
+
+        .company-card .match-reason {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .company-card .based-on {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .company-card .based-on strong {
+            color: var(--muted);
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            border-radius: 0 10px 10px 0;
+            color: #991b1b;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .input-section, .report-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">Career<span>Compass</span></h1>
+            <p class="tagline">Discover where your experience can take you next</p>
+        </header>
+
+        <div class="input-section">
+            <label for="resume">Paste your resume text below</label>
+            <textarea 
+                id="resume" 
+                placeholder="Paste the full text of your resume here...
+
+Include your work history, job titles, company names, and descriptions of what you did in each role. The more detail you include, the better recommendations you'll get."
+            ></textarea>
+            <button class="btn" id="analyze-btn" onclick="analyzeResume()">
+                <span class="btn-text">Analyze My Career Path</span>
+            </button>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="results-section" id="results">
+            <div class="screenshot-notice">
+                <strong>📸 Want to save this?</strong> Take a screenshot of this page to keep your results. This report isn't stored anywhere.
+            </div>
+
+            <div class="report-card">
+                <h2>Your Work History</h2>
+                <div class="extracted-history" id="extracted-history">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h2>Job Titles to Search For</h2>
+                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.95rem;">Based on your experience, these titles could be a good fit:</p>
+                <div class="title-suggestions" id="title-suggestions">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="report-card">
+                <h2>Companies That Could Be a Great Fit</h2>
+                <p style="color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem;">These companies have similar cultures, structures, or industries to where you've worked:</p>
+                <div id="company-suggestions">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Built to help you find your next opportunity
+        </footer>
+    </div>
+
+    <script>
+        async function analyzeResume() {
+            const resumeText = document.getElementById('resume').value.trim();
+            const btn = document.getElementById('analyze-btn');
+            const btnText = btn.querySelector('.btn-text');
+            const errorEl = document.getElementById('error-message');
+            const resultsEl = document.getElementById('results');
+
+            // Validation
+            if (!resumeText) {
+                showError('Please paste your resume text first.');
+                return;
+            }
+
+            if (resumeText.length < 100) {
+                showError('That seems too short. Please paste your full resume for better results.');
+                return;
+            }
+
+            // Reset state
+            errorEl.classList.remove('visible');
+            resultsEl.classList.remove('visible');
+
+            // Loading state
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Analyzing...';
+
+            try {
+                const response = await fetch('/.netlify/functions/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ resume: resumeText })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Analysis failed. Please try again.');
+                }
+
+                const data = await response.json();
+                renderResults(data);
+
+            } catch (err) {
+                showError(err.message || 'Something went wrong. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Analyze My Career Path';
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+
+        function renderResults(data) {
+            // Render extracted work history
+            const historyEl = document.getElementById('extracted-history');
+            historyEl.innerHTML = data.workHistory.map(job => `
+                <div class="job-item">
+                    <h3>${escapeHtml(job.title)}</h3>
+                    <div class="company">${escapeHtml(job.company)}</div>
+                    <p class="summary">${escapeHtml(job.summary)}</p>
+                </div>
+            `).join('');
+
+            // Render title suggestions
+            const titlesEl = document.getElementById('title-suggestions');
+            titlesEl.innerHTML = data.suggestedTitles.map(title => `
+                <span class="title-tag">${escapeHtml(title)}</span>
+            `).join('');
+
+            // Render company suggestions
+            const companiesEl = document.getElementById('company-suggestions');
+            companiesEl.innerHTML = data.suggestedCompanies.map(company => `
+                <div class="company-card">
+                    <h3><a href="${escapeHtml(company.url)}" target="_blank" rel="noopener">${escapeHtml(company.name)} ↗</a></h3>
+                    <p class="match-reason">${escapeHtml(company.reason)}</p>
+                    <p class="based-on">Similar to: <strong>${escapeHtml(company.basedOn)}</strong></p>
+                </div>
+            `).join('');
+
+            // Show results
+            document.getElementById('results').classList.add('visible');
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

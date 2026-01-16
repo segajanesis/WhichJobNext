@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Which Job Next? | Map Your Next Move</title>
+    <title>Which Job Next? | Make a Logical Leap</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
@@ -317,7 +317,7 @@
         </header>
 
         <div class="input-section">
-            <label for="resume">Paste your resume text below</label>
+            <label for="resume">Paste your resume in text-only format:</label>
             <textarea 
                 id="resume" 
                 placeholder="Paste the full text of your resume here...
@@ -325,7 +325,7 @@
 Include your work history, job titles, company names, and descriptions of what you did in each role. The more detail you include, the better recommendations you'll get."
             ></textarea>
             <button class="btn" id="analyze-btn" onclick="analyzeResume()">
-                <span class="btn-text">Build My Career Path</span>
+                <span class="btn-text">Generate Role and Company Matches</span>
             </button>
         </div>
 
@@ -333,7 +333,7 @@ Include your work history, job titles, company names, and descriptions of what y
 
         <div class="results-section" id="results">
             <div class="screenshot-notice">
-                <strong>📸 Want to save this?</strong> Take a screenshot of this page to keep your results. This report isn't stored anywhere.
+                <strong>Screenshot this page!</strong> This report isn't stored anywhere.
             </div>
 
             <div class="report-card">
@@ -390,7 +390,7 @@ Include your work history, job titles, company names, and descriptions of what y
 
             // Loading state
             btn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> Analyzing...';
+            btnText.innerHTML = '<span class="spinner"></span> Analyzing... this may take up to 60 seconds.';
 
             try {
                 const response = await fetch('/.netlify/functions/analyze', {

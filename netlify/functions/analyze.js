@@ -78,6 +78,7 @@ Important:
 - For URLs, use the company's actual careers page if you know it, otherwise use their homepage
 - Be specific in your reasoning - reference actual aspects of their experience
 - Include a mix of obvious fits and some stretch opportunities
+- Address the user as "you" and use "you/your" tense 
 - Only return valid JSON, no markdown or explanation`;
 
     const userPrompt = `Here is the resume to analyze:\n\n${resumeText}`;

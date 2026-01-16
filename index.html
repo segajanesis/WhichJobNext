@@ -320,9 +320,7 @@
             <label for="resume">Paste your resume in text-only format:</label>
             <textarea 
                 id="resume" 
-                placeholder="Paste the full text of your resume here...
-
-Include your work history, job titles, company names, and descriptions of what you did in each role. The more detail you include, the better recommendations you'll get."
+                placeholder="Include your work history, job titles, company names, and descriptions of what you did in each role. The more detail you include, the better recommendations you'll get."
             ></textarea>
             <button class="btn" id="analyze-btn" onclick="analyzeResume()">
                 <span class="btn-text">Generate Role and Company Matches</span>
@@ -333,7 +331,7 @@ Include your work history, job titles, company names, and descriptions of what y
 
         <div class="results-section" id="results">
             <div class="screenshot-notice">
-                <strong>Screenshot this page!</strong> This report isn't stored anywhere.
+                <strong>Screenshot this info!</strong> This report isn't stored anywhere.
             </div>
 
             <div class="report-card">
@@ -344,7 +342,7 @@ Include your work history, job titles, company names, and descriptions of what y
             </div>
 
             <div class="report-card">
-                <h2>Job Titles to Search For</h2>
+                <h2>Potential Job Titles to Search For</h2>
                 <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.95rem;">Based on your experience, these titles could be a good fit:</p>
                 <div class="title-suggestions" id="title-suggestions">
                     <!-- Populated by JS -->
@@ -352,8 +350,8 @@ Include your work history, job titles, company names, and descriptions of what y
             </div>
 
             <div class="report-card">
-                <h2>Companies That Could Be a Great Fit</h2>
-                <p style="color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem;">These companies have similar cultures, structures, or industries to where you've worked:</p>
+                <h2>Potential Companies That Match Your Experience</h2>
+                <p style="color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem;">These companies seem to have similar cultures, structures, or industries to where you've worked:</p>
                 <div id="company-suggestions">
                     <!-- Populated by JS -->
                 </div>
@@ -361,7 +359,7 @@ Include your work history, job titles, company names, and descriptions of what y
         </div>
 
         <footer>
-            Built with love and frustration in the 2026 job market
+            built with love and frustration in the 2026 job market
         </footer>
     </div>
 
@@ -380,7 +378,7 @@ Include your work history, job titles, company names, and descriptions of what y
             }
 
             if (resumeText.length < 100) {
-                showError('That seems too short. Please paste your full resume for better results.');
+                showError('That seems a bit too short. Please paste your full resume for better results.');
                 return;
             }
 

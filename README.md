@@ -11,5 +11,3 @@ A simple tool that analyzes your resume and suggests similar companies and job t
    - Extracted work history
    - Suggested job titles to search for
    - Companies that might be a good fit (with links)
-
-## Deployment to Netlify

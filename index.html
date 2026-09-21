@@ -287,6 +287,12 @@
             display: block;
         }
 
+        .error-message a {
+            color: #991b1b;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
         footer {
             text-align: center;
             padding: 2rem 0;
@@ -371,52 +377,33 @@
             const errorEl = document.getElementById('error-message');
             const resultsEl = document.getElementById('results');
 
-            // Validation
             if (!resumeText) {
                 showError('Please paste your resume text first.');
                 return;
             }
 
-            if (resumeText.length < 100) {
-                showError('That seems a bit too short. Please paste your full resume for better results.');
-                return;
-            }
-
-            // Reset state
             errorEl.classList.remove('visible');
             resultsEl.classList.remove('visible');
+            showOfflineDisclaimer();
 
-            // Loading state
             btn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> Analyzing... this may take up to 60 seconds.';
+            btnText.innerHTML = '<span class="spinner"></span> Taking you to Jane...';
 
-            try {
-                const response = await fetch('/.netlify/functions/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ resume: resumeText })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Analysis failed. Please try again.');
-                }
-
-                const data = await response.json();
-                renderResults(data);
-
-            } catch (err) {
-                showError(err.message || 'Something went wrong. Please try again.');
-            } finally {
+            setTimeout(() => {
                 btn.disabled = false;
-                btnText.textContent = 'Analyze My Career Path';
-            }
+                btnText.textContent = 'Generate Role and Company Matches';
+            }, 1200);
         }
 
         function showError(message) {
             const errorEl = document.getElementById('error-message');
             errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+
+        function showOfflineDisclaimer() {
+            const errorEl = document.getElementById('error-message');
+            errorEl.innerHTML = 'Sorry, this tool is not currently online — please contact <a href="https://www.linkedin.com/in/kaiserjane" target="_blank" rel="noopener noreferrer">Jane</a> directly for help with your career.';
             errorEl.classList.add('visible');
         }
 

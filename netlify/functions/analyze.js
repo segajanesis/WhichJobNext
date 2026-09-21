@@ -1,44 +1,85 @@
 // netlify/functions/analyze.js
 
-export async function handler(event, context) {
-    // Only allow POST requests
-    if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ error: 'Method not allowed' })
-        };
-    }
+const MAX_RESUME_LENGTH = 30000;
+const MIN_RESUME_LENGTH = 50;
+const OPENAI_TIMEOUT_MS = 55000;
 
-    // Parse the request body
-    let resumeText;
+function jsonResponse(statusCode, payload, extraHeaders = {}) {
+    return {
+        statusCode,
+        headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+            ...extraHeaders
+        },
+        body: JSON.stringify(payload)
+    };
+}
+
+function isNonEmptyString(value) {
+    return typeof value === 'string' && value.trim().length > 0;
+}
+
+function validateAnalysis(result) {
+    if (!result || typeof result !== 'object') return false;
+    if (!Array.isArray(result.workHistory)) return false;
+    if (!Array.isArray(result.suggestedTitles)) return false;
+    if (!Array.isArray(result.suggestedCompanies)) return false;
+
+    const validHistory = result.workHistory.every((job) =>
+        job &&
+        isNonEmptyString(job.company) &&
+        isNonEmptyString(job.title) &&
+        isNonEmptyString(job.summary)
+    );
+
+    const validTitles = result.suggestedTitles.every(isNonEmptyString);
+    const validCompanies = result.suggestedCompanies.every((company) =>
+        company &&
+        isNonEmptyString(company.name) &&
+        isNonEmptyString(company.url) &&
+        isNonEmptyString(company.reason) &&
+        isNonEmptyString(company.basedOn)
+    );
+
+    return validHistory && validTitles && validCompanies;
+}
+
+function isSafeUrl(value) {
     try {
-        const body = JSON.parse(event.body);
-        resumeText = body.resume;
-    } catch (e) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid request body' })
-        };
+        const url = new URL(value);
+        return url.protocol === 'https:' || url.protocol === 'http:';
+    } catch {
+        return false;
+    }
+}
+
+export async function handler(event, context) {
+    if (event.httpMethod !== 'POST') {
+        return jsonResponse(405, { error: 'Method not allowed' }, { Allow: 'POST' });
     }
 
-    if (!resumeText || resumeText.length < 50) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Resume text is required' })
-        };
+    let body;
+    try {
+        body = JSON.parse(event.body || '{}');
+    } catch {
+        return jsonResponse(400, { error: 'Invalid request body' });
     }
 
-    // Get OpenAI API key from environment variable
+    const resumeText = typeof body.resume === 'string' ? body.resume.trim() : '';
+    if (resumeText.length < MIN_RESUME_LENGTH || resumeText.length > MAX_RESUME_LENGTH) {
+        return jsonResponse(400, {
+            error: `Resume text must be between ${MIN_RESUME_LENGTH} and ${MAX_RESUME_LENGTH} characters.`
+        });
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'API key not configured' })
-        };
+        console.error('OPENAI_API_KEY is not configured');
+        return jsonResponse(500, { error: 'Analysis service is not configured' });
     }
 
-    // The prompt that does all the work
-    const systemPrompt = `You are a career advisor that analyzes resumes and suggests similar companies and job titles. 
+    const systemPrompt = `You are a career advisor that analyzes resumes and suggests similar companies and job titles.
 
 Your task:
 1. Extract the work history from the resume (company names, job titles, and a brief summary of responsibilities)
@@ -51,44 +92,32 @@ For company suggestions, think about:
 - Adjacent industries where their skills transfer well
 - Companies of similar size/stage where they'd feel comfortable
 
-Return your response as valid JSON with this exact structure:
+Return a JSON object with this exact structure:
 {
-    "workHistory": [
-        {
-            "company": "Company Name",
-            "title": "Job Title",
-            "summary": "Brief 1-2 sentence summary of what they did"
-        }
-    ],
-    "suggestedTitles": [
-        "Job Title 1",
-        "Job Title 2"
-    ],
-    "suggestedCompanies": [
-        {
-            "name": "Company Name",
-            "url": "https://company-careers-page-or-homepage.com",
-            "reason": "Why this company is a good fit (1-2 sentences)",
-            "basedOn": "Which of their previous companies this is similar to"
-        }
-    ]
+    "workHistory": [{ "company": "Company Name", "title": "Job Title", "summary": "Brief 1-2 sentence summary" }],
+    "suggestedTitles": ["Job Title 1", "Job Title 2"],
+    "suggestedCompanies": [{ "name": "Company Name", "url": "https://example.com", "reason": "Why this may be a good fit", "basedOn": "Similar previous company" }]
 }
 
 Important:
-- For URLs, use the company's actual careers page if you know it, otherwise use their homepage
-- Be specific in your reasoning - reference actual aspects of their experience
-- Include a mix of obvious fits and some stretch opportunities
-- Address the user as "you" and use "you/your" tense 
-- Only return valid JSON, no markdown or explanation`;
+- Use a company's actual careers page when you know it; otherwise use its homepage.
+- Only include valid http or https URLs.
+- Be specific and reference actual aspects of the user's experience.
+- Include a mix of obvious fits and stretch opportunities.
+- Address the user as "you" and use "you/your" tense.
+- Return JSON only, with no Markdown or additional explanation.`;
 
     const userPrompt = `Here is the resume to analyze:\n\n${resumeText}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
 
     try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
+            signal: controller.signal,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                Authorization: `Bearer ${apiKey}`
             },
             body: JSON.stringify({
                 model: 'gpt-4o',
@@ -96,50 +125,64 @@ Important:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
+                response_format: { type: 'json_object' },
                 temperature: 0.7,
                 max_tokens: 2000
             })
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('OpenAI API error:', errorData);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: 'Failed to analyze resume' })
-            };
+            console.error('OpenAI request failed', {
+                status: response.status,
+                requestId: context?.awsRequestId
+            });
+            const statusCode = response.status === 429 ? 429 : 502;
+            return jsonResponse(statusCode, {
+                error: statusCode === 429
+                    ? 'The analysis service is busy. Please try again shortly.'
+                    : 'The analysis service could not complete the request.'
+            });
         }
 
         const data = await response.json();
-        const content = data.choices[0].message.content;
-
-        // Parse the JSON response from GPT
-        let parsedContent;
-        try {
-            // Remove any markdown code blocks if present
-            const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            parsedContent = JSON.parse(cleanContent);
-        } catch (e) {
-            console.error('Failed to parse GPT response:', content);
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: 'Failed to parse analysis results' })
-            };
+        const content = data?.choices?.[0]?.message?.content;
+        if (!isNonEmptyString(content)) {
+            throw new Error('OpenAI returned an empty response');
         }
 
-        return {
-            statusCode: 200,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(parsedContent)
-        };
+        let parsedContent;
+        try {
+            parsedContent = JSON.parse(content);
+        } catch {
+            console.error('OpenAI returned invalid JSON', {
+                requestId: context?.awsRequestId
+            });
+            return jsonResponse(502, { error: 'The analysis service returned invalid results.' });
+        }
 
+        if (!validateAnalysis(parsedContent)) {
+            console.error('OpenAI returned an unexpected response shape', {
+                requestId: context?.awsRequestId
+            });
+            return jsonResponse(502, { error: 'The analysis service returned incomplete results.' });
+        }
+
+        const safeCompanies = parsedContent.suggestedCompanies.filter((company) => isSafeUrl(company.url));
+        return jsonResponse(200, {
+            ...parsedContent,
+            suggestedCompanies: safeCompanies
+        });
     } catch (error) {
-        console.error('Error calling OpenAI:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to analyze resume' })
-        };
+        if (error.name === 'AbortError') {
+            return jsonResponse(504, { error: 'The analysis took too long. Please try again.' });
+        }
+
+        console.error('Error calling OpenAI', {
+            message: error.message,
+            requestId: context?.awsRequestId
+        });
+        return jsonResponse(502, { error: 'The analysis service is temporarily unavailable.' });
+    } finally {
+        clearTimeout(timeout);
     }
 }
